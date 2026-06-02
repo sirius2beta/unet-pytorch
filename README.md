@@ -1,159 +1,425 @@
-## Unet：U-Net: Convolutional Networks for Biomedical Image Segmentation目标检测模型在Pytorch当中的实现
+<div align="center">
+
+# 🌊 UNet-PyTorch — 語義分割訓練框架
+
+**基於 PyTorch 的 U-Net 語義分割，支援 VGG16 / ResNet50 backbone**
+
+[![Python](https://img.shields.io/badge/Python-3.8-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.4.1-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org)
+[![CUDA](https://img.shields.io/badge/CUDA-12.1-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+
+</div>
+
 ---
 
-### 目录
-1. [仓库更新 Top News](#仓库更新)
-2. [相关仓库 Related code](#相关仓库)
-3. [性能情况 Performance](#性能情况)
-4. [所需环境 Environment](#所需环境)
-5. [文件下载 Download](#文件下载)
-6. [训练步骤 How2train](#训练步骤)
-7. [预测步骤 How2predict](#预测步骤)
-8. [评估步骤 miou](#评估步骤)
-9. [参考资料 Reference](#Reference)
+## 📌 什麼是 U-Net？
 
-## Top News
-**`2022-03`**:**进行大幅度更新、支持step、cos学习率下降法、支持adam、sgd优化器选择、支持学习率根据batch_size自适应调整。**  
-BiliBili视频中的原仓库地址为：https://github.com/bubbliiiing/unet-pytorch/tree/bilibili
+U-Net 是一種專為影像分割設計的卷積神經網路架構，因其對稱的 encoder-decoder 結構形似字母 **U** 而得名。透過 skip connection 保留細節特徵，特別適合醫學影像、遙測影像等需要精細分割的任務。
 
-**`2020-08`**:**创建仓库、支持多backbone、支持数据miou评估、标注数据处理、大量注释等。**  
-
-## 相关仓库
-| 模型 | 路径 |
-| :----- | :----- |
-Unet | https://github.com/bubbliiiing/unet-pytorch  
-PSPnet | https://github.com/bubbliiiing/pspnet-pytorch
-deeplabv3+ | https://github.com/bubbliiiing/deeplabv3-plus-pytorch
-
-### 性能情况
-**unet并不适合VOC此类数据集，其更适合特征少，需要浅层特征的医药数据集之类的。**
-| 训练数据集 | 权值文件名称 | 测试数据集 | 输入图片大小 | mIOU | 
-| :-----: | :-----: | :------: | :------: | :------: | 
-| VOC12+SBD | [unet_vgg_voc.pth](https://github.com/bubbliiiing/unet-pytorch/releases/download/v1.0/unet_vgg_voc.pth) | VOC-Val12 | 512x512| 58.78 | 
-| VOC12+SBD | [unet_resnet_voc.pth](https://github.com/bubbliiiing/unet-pytorch/releases/download/v1.0/unet_resnet_voc.pth) | VOC-Val12 | 512x512| 67.53 | 
-
-### 所需环境
-torch==1.2.0    
-torchvision==0.4.0   
-
-### 文件下载
-训练所需的权值可在百度网盘中下载。    
-链接: https://pan.baidu.com/s/1A22fC5cPRb74gqrpq7O9-A    
-提取码: 6n2c   
-
-VOC拓展数据集的百度网盘如下：   
-链接: https://pan.baidu.com/s/1vkk3lMheUm6IjTXznlg7Ng    
-提取码: 44mk   
-
-### 训练步骤
-#### 一、训练voc数据集
-1、将我提供的voc数据集放入VOCdevkit中（无需运行voc_annotation.py）。  
-2、运行train.py进行训练，默认参数已经对应voc数据集所需要的参数了。  
-
-#### 二、训练自己的数据集
-1、本文使用VOC格式进行训练。  
-2、训练前将标签文件放在VOCdevkit文件夹下的VOC2007文件夹下的SegmentationClass中。    
-3、训练前将图片文件放在VOCdevkit文件夹下的VOC2007文件夹下的JPEGImages中。    
-4、在训练前利用voc_annotation.py文件生成对应的txt。    
-5、注意修改train.py的num_classes为分类个数+1。    
-6、运行train.py即可开始训练。  
-
-#### 三、训练医药数据集
-1、下载VGG的预训练权重到model_data下面。  
-2、按照默认参数运行train_medical.py即可开始训练。
-
-### 预测步骤
-#### 一、使用预训练权重
-##### a、VOC预训练权重
-1. 下载完库后解压，如果想要利用voc训练好的权重进行预测，在百度网盘或者release下载权值，放入model_data，运行即可预测。  
-```python
-img/street.jpg
-```    
-2. 在predict.py里面进行设置可以进行fps测试和video视频检测。    
-##### b、医药预训练权重
-1. 下载完库后解压，如果想要利用医药数据集训练好的权重进行预测，在百度网盘或者release下载权值，放入model_data，修改unet.py中的model_path和num_classes；
-```python
-_defaults = {
-    #-------------------------------------------------------------------#
-    #   model_path指向logs文件夹下的权值文件
-    #   训练好后logs文件夹下存在多个权值文件，选择验证集损失较低的即可。
-    #   验证集损失较低不代表miou较高，仅代表该权值在验证集上泛化性能较好。
-    #-------------------------------------------------------------------#
-    "model_path"    : 'model_data/unet_vgg_medical.pth',
-    #--------------------------------#
-    #   所需要区分的类的个数+1
-    #--------------------------------#
-    "num_classes"   : 2,
-    #--------------------------------#
-    #   所使用的的主干网络：vgg、resnet50   
-    #--------------------------------#
-    "backbone"      : "vgg",
-    #--------------------------------#
-    #   输入图片的大小
-    #--------------------------------#
-    "input_shape"   : [512, 512],
-    #--------------------------------#
-    #   blend参数用于控制是否
-    #   让识别结果和原图混合
-    #--------------------------------#
-    "blend"         : True,
-    #--------------------------------#
-    #   是否使用Cuda
-    #   没有GPU可以设置成False
-    #--------------------------------#
-    "cuda"          : True,
-}
 ```
-2. 运行即可预测。  
-```python
-img/cell.png
+Input Image
+    │
+    ▼
+┌─────────────────────────────────────────┐
+│  Encoder (Backbone: VGG16 / ResNet50)   │
+│  ┌──────┐  ┌──────┐  ┌──────┐           │
+│  │ Conv │→ │ Conv │→ │ Conv │→ ...       │
+│  └──┬───┘  └──┬───┘  └──┬───┘           │
+│     │  Skip   │  Skip   │               │
+│     ▼         ▼         ▼               │
+│  Decoder (Upsample + Concat)            │
+│  └──────┘  └──────┘  └──────┘           │
+└─────────────────────────────────────────┘
+    │
+    ▼
+Segmentation Map (0 = background, 1 = target)
 ```
-#### 二、使用自己训练的权重
-1. 按照训练步骤训练。    
-2. 在unet.py文件里面，在如下部分修改model_path、backbone和num_classes使其对应训练好的文件；**model_path对应logs文件夹下面的权值文件**。    
-```python
-_defaults = {
-    #-------------------------------------------------------------------#
-    #   model_path指向logs文件夹下的权值文件
-    #   训练好后logs文件夹下存在多个权值文件，选择验证集损失较低的即可。
-    #   验证集损失较低不代表miou较高，仅代表该权值在验证集上泛化性能较好。
-    #-------------------------------------------------------------------#
-    "model_path"    : 'model_data/unet_vgg_voc.pth',
-    #--------------------------------#
-    #   所需要区分的类的个数+1
-    #--------------------------------#
-    "num_classes"   : 21,
-    #--------------------------------#
-    #   所使用的的主干网络：vgg、resnet50   
-    #--------------------------------#
-    "backbone"      : "vgg",
-    #--------------------------------#
-    #   输入图片的大小
-    #--------------------------------#
-    "input_shape"   : [512, 512],
-    #--------------------------------#
-    #   blend参数用于控制是否
-    #   让识别结果和原图混合
-    #--------------------------------#
-    "blend"         : True,
-    #--------------------------------#
-    #   是否使用Cuda
-    #   没有GPU可以设置成False
-    #--------------------------------#
-    "cuda"          : True,
-}
+
+---
+
+## 🗂️ 資料夾結構
+
 ```
-3. 运行predict.py，输入    
+unet-pytorch/
+├── 📁 VOCdevkit/
+│   └── VOC2007/
+│       ├── JPEGImages/          ← 訓練用原始影像 (.jpg)
+│       ├── SegmentationClass_Origin/  ← 原始 Mask (.png)
+│       ├── SegmentationClass/   ← 二值化後的 Mask (.png)
+│       └── ImageSets/Segmentation/   ← train/val 清單
+├── 📁 img/                      ← 測試用影像
+├── 📁 nets/                     ← UNet 模型定義
+│   ├── unet.py
+│   ├── vgg.py
+│   └── resnet.py
+├── 📁 utils/                    ← 工具函式
+├── 📁 logs/                     ← 訓練權重 & Loss 曲線
+├── 📁 tool/
+│   ├── download_pth.py          ← 下載預訓練權重
+│   └── rename_mask.py           ← 統一影像與 Mask 檔名
+├── train.py                     ← 訓練入口
+├── unet.py                      ← 預測入口
+├── voc_annotation.py            ← 產生 train/val 清單
+└── convert_binary_img.py        ← Mask 二值化轉換
+```
+
+---
+
+## ⚡ 快速開始
+
+### Step 1 — Clone 專案
+
+```bash
+git clone https://github.com/TWKuoNW/unet-pytorch.git
+cd unet-pytorch
+```
+
+### Step 2 — 建立 Conda 環境
+
+```bash
+# Linux
+conda env create -f environment_linux.yml
+conda activate unet_env
+
+# macOS (Apple Silicon)
+conda env create -f environment.yml
+conda activate unet_env
+```
+
+### Step 3 — 下載預訓練權重
+
+```bash
+python tool/download_pth.py
+```
+
+---
+
+## 📂 準備資料集
+
+將資料放入對應資料夾，並清空 `img/` 內的舊測試圖：
+
+| 類型 | 放置路徑 |
+|------|---------|
+| 🖼️ 原始影像 | `VOCdevkit/VOC2007/JPEGImages/` |
+| 🎭 Mask（原始） | `VOCdevkit/VOC2007/SegmentationClass_Origin/` |
+| 🔍 測試影像 | `img/` |
+
+> **注意：** 影像格式需為 `.jpg`，Mask 格式需為 `.png`
+
+---
+
+## 🔄 資料前處理流程
+
+```
+原始影像 + Mask
+       │
+       ▼
+① rename_mask.py        統一 Image 與 Mask 的檔名
+       │
+       ▼
+② convert_binary_img.py 將 Mask 轉成二值格式
+   (有顏色 → 1, 黑色 → 0)
+       │
+       ▼
+③ voc_annotation.py     產生 train / val 清單
+       │
+       ▼
+   ✅ 資料準備完成
+```
+
+### Step 4 — 統一影像與 Mask 檔名
+
+> 如果影像與 Mask 的檔名已相同，可跳過此步驟。
+
+```bash
+python tool/rename_mask.py
+```
+
+### Step 5 — Mask 二值化轉換
+
+將 `SegmentationClass_Origin/` 的 Mask 轉換為 binary 格式，輸出至 `SegmentationClass/`：
+
+```bash
+python VOCdevkit/VOC2007/convert_seg.py
+```
+
+> **格式要求：** 背景像素值 = `0`，目標像素值 = `1`
+
+### Step 6 — 產生訓練/驗證清單
+
+```bash
+python voc_annotation.py
+```
+
+預設以 **9:1** 比例切分 train / val。
+
+---
+
+## 🚀 開始訓練
+
+```bash
+python train.py
+```
+
+訓練過程中的 Loss 曲線與權重檔會自動儲存於 `logs/` 資料夾。
+
+```
+logs/
+├── loss_2024_xx_xx_xx_xx_xx/
+│   ├── epoch_loss_train.txt
+│   └── epoch_loss_val.txt
+└── best_epoch_weights.pth
+```
+
+> **Tip：** 若無 GPU，請在 `train.py` 中將 `Cuda = True` 改為 `Cuda = False`
+
+---
+
+## 🔮 推理預測
+
+```bash
+python unet.py
+```
+
+測試影像從 `img/` 讀取，輸出分割結果。
+
+---
+
+## 📊 Backbone 比較
+
+| Backbone | 特點 | 適合場景 |
+|----------|------|---------|
+| **VGG16** | 結構簡單、訓練穩定 | 資料量較少 |
+| **ResNet50** | 更深層、表現更好 | 資料量充足 |
+
+---
+
+## 📈 模型表現比較 (Model Performance)
+
+以下為近期基於 ResNet50 的各版本模型在驗證/測試集上的表現：
+
+| Model | mRecall | mPrecision | mAcc | mFallout | mIoU | F1-Score |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **v2_1** | 0.7550 | 0.7354 | 0.7332 | 0.2450 | 0.5742 | 0.7451 |
+| **v3_0_0** | 0.8128 | 0.8683 | 0.8532 | 0.1872 | 0.7140 | 0.8396 |
+| **v3_0_1** | 0.8458 | 0.8794 | 0.8745 | 0.1542 | 0.7548 | 0.8623 |
+| **v3_1** | **0.8460** | **0.9000** | **0.8817** | **0.1540** | **0.7634** | **0.8722** |
+
+*註：最新版本的 `v3_1` 模型在準確率、召回率與 mIoU (76.34%) 上皆有顯著提升。*
+
+---
+
+## 🛠️ 常見問題
+
+**Q：Mask 格式不對怎麼辦？**
+> 確認像素值是否為 0 和 1，若為 0 和 255 請執行 `convert_binary_img.py` 轉換。
+
+**Q：影像和 Mask 檔名不一致？**
+> 執行 `tool/rename_mask.py` 自動對齊。
+
+**Q：訓練沒有收斂？**
+> 觀察 val loss 趨勢，若持續下降代表正在收斂；若平台化表示已收斂或需調整 learning rate。
+
+---
+
+<div align="center">
+
+Made with ❤️ | [回報問題](https://github.com/TWKuoNW/unet-pytorch/issues)
+
+</div>
+
+---
+
+## Coast AI 訓練流程
+
+### 事前準備
+
+- 確認已安裝 Python 環境與相依套件（參考 `env_yal/requirements.txt`）
+- 所有指令皆在專案根目錄（`unet-pytorch/`）執行
+
+---
+
+### PART 1：整理 CVAT 資料集
+
+**步驟 1：解壓縮 CVAT 下載的資料包**
+
+將從 CVAT 下載的 `cvat.zip` 解壓縮，得到一個資料夾（以下稱「CVAT來源資料夾」）。
+該資料夾內部結構應長這樣：
+
+```
+CVAT來源資料夾/
+├── JPEGImages/
+│   ├── train/   ← 訓練用原始圖片
+│   └── test/    ← 測試用原始圖片
+└── SegmentationClass/
+    ├── train/   ← 訓練用標注遮罩
+    └── test/    ← 測試用標注遮罩
+```
+
+**步驟 2：執行資料整理腳本**
+
+開啟 `tool/format_cvat_dataset.py`，修改最底部的兩個路徑設定：
+
 ```python
-img/street.jpg
-```   
-4. 在predict.py里面进行设置可以进行fps测试和video视频检测。    
+folder_a = "/你的路徑/CVAT來源資料夾"   # 步驟1解壓縮後的資料夾
+folder_b = "/你的路徑/整理後輸出資料夾"  # 可以是任意空資料夾
+```
 
-### 评估步骤
-1、设置get_miou.py里面的num_classes为预测的类的数量加1。  
-2、设置get_miou.py里面的name_classes为需要去区分的类别。  
-3、运行get_miou.py即可获得miou大小。  
+然後執行：
 
-## Reference
-https://github.com/ggyyzm/pytorch_segmentation  
-https://github.com/bonlime/keras-deeplab-v3-plus
+```bash
+python tool/format_cvat_dataset.py
+```
+
+執行完成後，輸出資料夾（`folder_b`）的結構會變成：
+
+```
+整理後輸出資料夾/
+├── train/
+│   ├── img/          ← 訓練用圖片（已整理）
+│   └── mask_origin/  ← 訓練用原始遮罩（已補齊缺失的 mask）
+└── test/
+    ├── img/          ← 測試用圖片
+    └── mask_origin/  ← 測試用原始遮罩
+```
+
+---
+
+### PART 2：訓練模型
+
+**步驟 3：建立 VOC 標準資料夾結構**
+
+```bash
+python tool/creat_voc_folder.py
+```
+
+這會在專案根目錄自動建立以下空資料夾（不需手動建立）：
+
+```
+VOCdevkit/VOC2007/JPEGImages/
+VOCdevkit/VOC2007/SegmentationClass_Origin/
+VOCdevkit/VOC2007/SegmentationClass/
+VOCdevkit/VOC2007/ImageSets/Segmentation/
+```
+
+**步驟 4：複製訓練資料到 VOC 資料夾**
+
+將 PART 1 整理出來的訓練資料複製進去：
+
+| 來源 | 目的地 |
+|------|--------|
+| `整理後輸出資料夾/train/img/` 內的所有檔案 | `VOCdevkit/VOC2007/JPEGImages/` |
+| `整理後輸出資料夾/train/mask_origin/` 內的所有檔案 | `VOCdevkit/VOC2007/SegmentationClass_Origin/` |
+
+> 注意：是複製「資料夾內的檔案」，不是複製資料夾本身
+
+**步驟 5：將遮罩轉換為二值化格式**
+
+開啟 `tool/convert_binary_img.py`，確認路徑設定正確（預設值如下）：
+
+```python
+input_folder  = "VOCdevkit/VOC2007/SegmentationClass_Origin"
+output_folder = "VOCdevkit/VOC2007/SegmentationClass"
+```
+
+然後執行：
+
+```bash
+python tool/convert_binary_img.py
+```
+
+這會把原始遮罩（灰度值 0~255）轉換成二值圖（只有 0 和 1），結果存入 `SegmentationClass/`。
+
+**步驟 6：產生訓練集與驗證集的清單檔**
+
+開啟 `tool/voc_annotation.py`，確認以下設定（預設 80% 訓練 / 20% 驗證）：
+
+```python
+trainval_percent = 1    # 全部資料都參與劃分（不建議改動）
+train_percent    = 0.8  # 80% 訓練集，20% 驗證集（可依需求調整）
+VOCdevkit_path   = 'VOCdevkit'  # 不需修改
+```
+
+然後執行：
+
+```bash
+python tool/voc_annotation.py
+```
+
+這會自動產生 `VOCdevkit/VOC2007/ImageSets/Segmentation/train.txt` 和 `val.txt`。
+
+**步驟 7：設定訓練參數並開始訓練**
+
+開啟 `train.py`，找到並修改以下關鍵參數：
+
+```python
+num_classes = 2          # 類別數（背景 + 分割目標數）
+                         # 只分割一種物體 → 填 2
+model_path  = "pth_folder/unet_resnet_voc.pth"
+                         # 預訓練模型路徑；從頭訓練請填空字串 ""
+input_shape = [512, 512] # 輸入圖片大小，必須是 32 的倍數
+```
+
+確認設定後執行：
+
+```bash
+python train.py
+```
+
+訓練完成的模型權重（`.pth` 檔）會自動儲存在 `logs/` 資料夾內。
+
+---
+
+### PART 3：測試模型效果
+
+**步驟 8：準備測試資料**
+
+將 PART 1 整理出來的測試資料放到專案根目錄的對應資料夾：
+
+| 來源 | 目的地 |
+|------|--------|
+| `整理後輸出資料夾/test/img/` 內的所有檔案 | `img/` |
+| `整理後輸出資料夾/test/mask_origin/` 內的所有檔案 | `mask_origin/` |
+
+> `img/` 和 `mask_origin/` 若不存在請手動建立
+
+**步驟 9：將測試遮罩轉換為二值化格式**
+
+開啟 `tool/convert_binary_img.py`，修改路徑設定：
+
+```python
+input_folder  = "mask_origin"
+output_folder = "mask"
+```
+
+然後執行：
+
+```bash
+python tool/convert_binary_img.py
+```
+
+**步驟 10：設定要測試的模型並執行預測**
+
+開啟 `unet.py`，找到 `model_path` 並改成你要測試的模型路徑：
+
+```python
+model_path = "logs/你的模型.pth"   # 改成 logs/ 內實際的 .pth 檔名
+```
+
+然後執行：
+
+```bash
+python predict_performance.py
+```
+
+預測結果圖片會輸出到 `img_out/` 資料夾內。
+
+---
+
+### 小工具說明
+
+| 腳本 | 功能 | 使用時機 |
+|------|------|---------|
+| `tool/rename_mask.py` | 移除 `SegmentationClass/` 內所有檔名開頭的 `pm_` 前綴 | 遮罩檔名是 `pm_xxxx.png` 格式時 |
+| `tool/to_jpg.py` | 將 `JPEGImages/` 內的 `.jpeg` 副檔名批次改為 `.jpg` | CVAT 匯出的圖片副檔名是 `.jpeg` 時 |

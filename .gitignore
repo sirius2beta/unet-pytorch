@@ -6,6 +6,7 @@ datasets/
 Medical_Datasets/
 lfw/
 logs/
+img_out/
 model_data/
 .temp_miou_out/
 
@@ -138,3 +139,18 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# 忽略所有 JPG 圖片（不區分大小寫）
+*.jpg
+*.jpeg
+*.JPG
+
+# 忽略所有 PNG 圖片（不區分大小寫）
+*.png
+*.PNG
+
+# 忽略所有 MP4 影片
+*.mp4
+*.MP4
+
+*.pth
