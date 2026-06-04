@@ -155,4 +155,6 @@ dmypy.json
 
 *.pth
 
-2025*
+.executable/
+
+*.exe

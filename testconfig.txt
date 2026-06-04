@@ -1,0 +1,5 @@
+{
+    "project_directory": "D:/project/unet-pytorch",
+    "model_path": "logs/v3_1.pth",
+    "model_original_path": "D:/project/unet-pytorch/logs/v3_1.pth"
+}

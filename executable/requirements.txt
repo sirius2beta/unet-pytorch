@@ -1,0 +1,4 @@
+PyQt6 
+pyinstaller 
+Pillow 
+opencv-python

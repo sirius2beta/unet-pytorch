@@ -118,8 +118,8 @@ def main():
     txt_path        = "VOCdevkit/VOC2007/ImageSets/Segmentation/test.txt"
     
     # 修改輸出路徑為兩個獨立資料夾
-    dir_save_jpeg_path  = "imgout/JPEGImages"
-    dir_save_mask_path  = "imgout/SegmentationClass"
+    dir_save_jpeg_path  = "result/imgout/JPEGImages"
+    dir_save_mask_path  = "result/imgout/SegmentationClass"
     
     # Ground Truth Mask 的路徑 (用於計算 mIoU 等指標)
     dir_mask_path   = "VOCdevkit/VOC2007/SegmentationClass/" 
