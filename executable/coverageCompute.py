@@ -177,8 +177,8 @@ class SeagrassApp(QWidget):
 
         # 執行與停止按鈕
         btn_layout = QHBoxLayout()
-        self.btn_start = QPushButton("開始極速辨識")
-        self.btn_start.setStyleSheet("font-weight: bold; color: blue;")
+        self.btn_start = QPushButton("開始辨識")
+        self.btn_start.setStyleSheet("font-weight: bold; color: white;")
         self.btn_start.clicked.connect(self.start_inference)
         self.btn_stop = QPushButton("強制停止")
         self.btn_stop.setEnabled(False)
