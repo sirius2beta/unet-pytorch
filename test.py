@@ -117,7 +117,7 @@ def main():
     dir_origin_path = "VOCdevkit/VOC2007/JPEGImages/"
     txt_path        = "VOCdevkit/VOC2007/ImageSets/Segmentation/test.txt"
     
-    # 修改輸出路徑為兩個獨立資料夾
+    # 輸出路徑為兩個獨立資料夾
     dir_save_jpeg_path  = "result/imgout/JPEGImages"
     dir_save_mask_path  = "result/imgout/SegmentationClass"
     
@@ -126,7 +126,16 @@ def main():
     # ============================================
 
     print("Initializing Unet model...")
-    model = Unet()
+    
+    # === 核心修改：接收由 UI 傳遞過來的 Docker 環境變數 ===
+    model_path = os.environ.get("MODEL_PATH")
+    
+    if model_path and os.path.exists(model_path):
+        print(f"--> [Info] Loading model weights from UI selection: {model_path}")
+        model = Unet(model_path=model_path)
+    else:
+        print("--> [Warning] MODEL_PATH not found or invalid. Using default config in unet.py.")
+        model = Unet()
 
     print(f"Starting directory prediction based on {txt_path}...")
     predict_directory_from_txt(
