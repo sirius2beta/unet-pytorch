@@ -15,11 +15,11 @@ class DockerRunnerApp(QWidget):
     def initUI(self):
         # 1. 專案目錄選擇欄位
         dir_layout = QHBoxLayout()
-        self.dir_label = QLabel("Project Directory:")
+        self.dir_label = QLabel("unet-pytorch資料夾:")
         self.dir_input = QLineEdit()
         self.dir_input.setPlaceholderText("選擇unet-pytorch專案目錄...")
         
-        self.btn_browse = QPushButton("Browse")
+        self.btn_browse = QPushButton("瀏覽...")
         self.btn_browse.clicked.connect(self.browse_directory)
         
         dir_layout.addWidget(self.dir_label)
@@ -28,11 +28,11 @@ class DockerRunnerApp(QWidget):
         
         # 2. 模型權值選擇欄位 (.pth)
         model_layout = QHBoxLayout()
-        self.model_label = QLabel("Model Weight:")
+        self.model_label = QLabel("模型權重 (.pth):")
         self.model_input = QLineEdit()
         self.model_input.setPlaceholderText("選擇模型權重(.pth)...")
         
-        self.btn_browse_model = QPushButton("Browse")
+        self.btn_browse_model = QPushButton("瀏覽...")
         self.btn_browse_model.clicked.connect(self.browse_model_file)
         
         model_layout.addWidget(self.model_label)

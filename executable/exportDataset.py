@@ -133,11 +133,11 @@ class DatasetMergerVOCApp(QWidget):
 
         # 專案目錄
         proj_layout = QHBoxLayout()
-        proj_label = QLabel("專案目錄 (輸出 VOCdevkit 處):")
+        proj_label = QLabel("unet-pytorch資料夾:")
         proj_label.setFixedWidth(200)
         self.project_dir_input = QLineEdit()
         self.project_dir_input.setReadOnly(True)
-        proj_btn = QPushButton("選擇專案...")
+        proj_btn = QPushButton("瀏覽...")
         proj_btn.clicked.connect(self.browse_project)
         proj_layout.addWidget(proj_label)
         proj_layout.addWidget(self.project_dir_input)
@@ -149,7 +149,7 @@ class DatasetMergerVOCApp(QWidget):
         db_label.setFixedWidth(200)
         self.database_dir_input = QLineEdit()
         self.database_dir_input.setReadOnly(True)
-        db_btn = QPushButton("選擇 Database...")
+        db_btn = QPushButton("瀏覽...")
         db_btn.clicked.connect(self.browse_database)
         db_layout.addWidget(db_label)
         db_layout.addWidget(self.database_dir_input)
